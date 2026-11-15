@@ -17,18 +17,16 @@ const initDB = async () => {
   try {
     await pool.query(`
       
-      CREATE TABLE users(
-      id SERIAL PRIMARY KEY,
-      name VARCHAR(255),
-      email VARCHAR(255) NOT NULL,
-      password VARCHAR(255) NOT NULL,
-
-      is_Active BOOLEAN DEFAULT true,
-      created_at TIMESTAMP DEFAULT NOW(),
-      updated_at TIMESTAMP DEFAULT NOW()
-      );
-
-      `);
+  CREATE TABLE IF NOT EXISTS users (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(255),
+    email VARCHAR(255) UNIQUE NOT NULL,
+    password VARCHAR(255) NOT NULL,
+    is_active BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMP DEFAULT NOW(),
+    updated_at TIMESTAMP DEFAULT NOW()
+);
+`);
     console.log("DataBase Connected");
   } catch (error) {
     console.log(error);
@@ -47,14 +45,32 @@ app.get("/", (req: Request, res: Response) => {
   });
 });
 
-app.post("/", async (req: Request, res: Response) => {
-  const { name, age, password } = req.body;
+app.post("/api/v1/users", async (req: Request, res: Response) => {
+  try {
+    const { name, email, password } = req.body;
 
-  res.status(200).json({
-    success: true,
-    message: "Post method",
-    data: { name, age },
-  });
+    const result = await pool.query(
+      `
+        INSERT INTO users (name, email, password)
+        VALUES ($1, $2, $3)
+        RETURNING id, name, email, is_active, created_at
+      `,
+      [name, email, password],
+    );
+
+    res.status(201).json({
+      success: true,
+      message: "User Created Successfully",
+      data: result.rows[0],
+    });
+  } catch (error: any) {
+    console.error("User Creation Error:", error);
+
+    res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+    });
+  }
 });
 
 app.listen(port, () => {
