@@ -150,6 +150,29 @@ app.put("/api/v1/users/:id", async (req: Request, res: Response) => {
   }
 });
 
+app.delete("/api/v1/users/:id", async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const result = await pool.query(
+      `
+      DELETE FROM users
+      WHERE id=$1
+      `,
+      [id],
+    );
+
+    res.status(200).json({
+      success: true,
+      message: "Deleted Successfully",
+      data: result.rows[0],
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+    });
+  }
+});
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
 });
