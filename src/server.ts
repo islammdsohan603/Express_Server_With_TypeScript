@@ -161,6 +161,13 @@ app.delete("/api/v1/users/:id", async (req: Request, res: Response) => {
       [id],
     );
 
+    if (result.rowCount === 0) {
+      res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
     res.status(200).json({
       success: true,
       message: "Deleted Successfully",
