@@ -42,7 +42,6 @@ app.get("/", (req: Request, res: Response) => {
   res.status(200).json({
     success: true,
     message: "Express with TypeScript Server is running",
-    author: "SOHAN",
   });
 });
 
@@ -109,7 +108,7 @@ app.get("/api/v1/users/:id", async (req: Request, res: Response) => {
     res.status(200).json({
       success: true,
       message: "Single Users data Show",
-      data: result.rows,
+      data: result.rows[0],
     });
   } catch (error) {
     res.status(500).json({
