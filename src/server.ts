@@ -64,8 +64,6 @@ app.post("/api/v1/users", async (req: Request, res: Response) => {
       data: result.rows[0],
     });
   } catch (error: any) {
-    console.error("User Creation Error:", error);
-
     res.status(500).json({
       success: false,
       message: "Internal Server Error",
@@ -114,6 +112,40 @@ app.get("/api/v1/users/:id", async (req: Request, res: Response) => {
     res.status(500).json({
       success: false,
       message: "Internal Server Error ",
+    });
+  }
+});
+
+app.put("/api/v1/users/:id", async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const { name, email, password } = req.body;
+
+    const result = await pool.query(
+      `
+        UPDATE users
+        SET
+          name = COALESCE($1, name),
+          email = COALESCE($2, email),
+          password = COALESCE($3, password),
+          updated_at = NOW()
+        WHERE id = $4
+        RETURNING id, name, email, is_active, created_at, updated_at
+      `,
+      [name ?? null, email ?? null, password ?? null, id],
+    );
+
+    res.status(200).json({
+      success: true,
+      message: "Users Data Updated Successfully",
+      data: result.rows[0],
+    });
+  } catch (error) {
+    console.error("UPDATE ERROR:", error);
+
+    res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
     });
   }
 });
