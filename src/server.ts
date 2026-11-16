@@ -1,5 +1,6 @@
 import dotenv from "dotenv";
 import type { Request, Response } from "express";
+
 import express from "express";
 import { Pool } from "pg";
 dotenv.config();
@@ -66,6 +67,25 @@ app.post("/api/v1/users", async (req: Request, res: Response) => {
   } catch (error: any) {
     console.error("User Creation Error:", error);
 
+    res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+    });
+  }
+});
+
+app.get("/api/v1/users", async (req: Request, res: Response) => {
+  try {
+    const result = await pool.query(`
+      SELECT * FROM users
+      `);
+
+    res.status(200).json({
+      success: true,
+      message: "User Get Successfully!",
+      data: result.rows,
+    });
+  } catch (error: any) {
     res.status(500).json({
       success: false,
       message: "Internal Server Error",
