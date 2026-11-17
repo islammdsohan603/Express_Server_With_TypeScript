@@ -38,6 +38,11 @@ const initDataBase = async () => {
       ADD COLUMN IF NOT EXISTS email VARCHAR(255) UNIQUE;
     `);
 
+    await pool.query(`
+      ALTER TABLE student_management
+      ADD COLUMN IF NOT EXISTS password VARCHAR(255) UNIQUE;
+      `);
+
     console.log("DataBase Table Created Successfully!");
   } catch (error) {
     console.log("Database Error:", error);
@@ -54,18 +59,20 @@ app.get("/", (req: Request, res: Response) => {
 });
 
 // POST Method - Create Student
+
 app.post("/api/v1/students", async (req: Request, res: Response) => {
   try {
-    const { full_name, email, phone, age, department, marks } = req.body;
+    const { full_name, email, password, phone, age, department, marks } =
+      req.body;
 
     const studentsData = await pool.query(
       `
       INSERT INTO student_management
-      (full_name, email, phone, age, department, marks)
-      VALUES ($1, $2, $3, $4, $5, $6)
+      (full_name, email, password, phone, age, department, marks)
+      VALUES ($1, $2, $3, $4, $5, $6, $7)
       RETURNING *
       `,
-      [full_name, email, phone, age, department, marks],
+      [full_name, email, password, phone, age, department, marks],
     );
 
     return res.status(201).json({
