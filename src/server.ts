@@ -83,7 +83,7 @@ app.post("/api/v1/students", async (req: Request, res: Response) => {
   }
 });
 
-// Get Method - Show Student Data
+// Get Method - Show Students Data
 
 app.get("/api/v1/students", async (req: Request, res: Response) => {
   try {
@@ -99,6 +99,35 @@ app.get("/api/v1/students", async (req: Request, res: Response) => {
     res.status(500).json({
       success: false,
       message: "Internal Error in Get Students data",
+    });
+  }
+});
+
+// Get Method - in Single Students Data
+
+app.get("/api/v1/students/:id", async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+
+    const studentsData = await pool.query(
+      `
+      SELECT * FROM student_management
+      WHERE id = $1
+      `,
+      [id],
+    );
+
+    return res.status(200).json({
+      success: true,
+      message: "Student Data Retrieved Successfully",
+      data: studentsData.rows[0],
+    });
+  } catch (error) {
+    console.log("GET SINGLE STUDENT ERROR:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
     });
   }
 });
