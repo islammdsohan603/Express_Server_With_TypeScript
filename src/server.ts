@@ -2,6 +2,7 @@ import bcrypt from "bcryptjs";
 import dotenv from "dotenv";
 import express, { type Request, type Response } from "express";
 import { Pool } from "pg";
+import config from "./config/index.js";
 
 dotenv.config();
 
@@ -12,7 +13,7 @@ const port = process.env.PORT || 5000;
 
 // Database Connection
 const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
+  connectionString: config.connection_String,
 });
 
 // Database Table Create
@@ -270,8 +271,8 @@ const startServer = async () => {
   try {
     await initDataBase();
 
-    app.listen(port, () => {
-      console.log(`Server is Running on ${port}`);
+    app.listen(config.port, () => {
+      console.log(`Server is Running on ${config.port}`);
     });
   } catch (error) {
     console.log("Server Startup Failed:", error);
