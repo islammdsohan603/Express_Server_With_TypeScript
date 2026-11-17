@@ -3,14 +3,17 @@ import config from "./config/index.js";
 import { initDataBase } from "./db/index.js";
 
 const main = async () => {
-  // Start Server
   try {
+    // Initialize Database
     await initDataBase();
+
+    // Start Server
     app.listen(config.port, () => {
-      console.log(`Server is Running on ${config.port}`);
+      console.log(`Server is Running on PORT ${config.port}`);
     });
   } catch (error) {
-    console.log("Server Startup Failed:", error);
+    console.error("Server Startup Failed:", error);
+
     process.exit(1);
   }
 };
