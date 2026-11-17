@@ -15,8 +15,6 @@ const pool = new Pool({
 });
 
 // Database Table Create
-
-// Database Table Create
 const initDataBase = async () => {
   try {
     // 1. Create Table
@@ -81,6 +79,26 @@ app.post("/api/v1/students", async (req: Request, res: Response) => {
     return res.status(500).json({
       success: false,
       message: "Internal Server Error",
+    });
+  }
+});
+
+// Get Method - Show Student Data
+
+app.get("/api/v1/students", async (req: Request, res: Response) => {
+  try {
+    const studentsData = await pool.query(`
+      SELECT * FROM student_management
+      `);
+    res.status(200).json({
+      success: true,
+      message: "Students Data show in Successfully",
+      data: studentsData.rows[0],
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Internal Error in Get Students data",
     });
   }
 });
