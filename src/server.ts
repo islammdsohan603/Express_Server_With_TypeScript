@@ -230,6 +230,41 @@ app.put("/api/v1/students/:id", async (req: Request, res: Response) => {
   }
 });
 
+// Deleted Method - Students Data
+
+app.delete("/api/v1/students/:id", async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const studentsData = await pool.query(
+      `
+      DELETE FROM student_management
+      WHERE id=$1
+
+      RETURNING *
+      `,
+      [id],
+    );
+
+    if (studentsData.rowCount === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "User Data Not found",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Students Data Deleted Successfully",
+      data: studentsData.rows[0],
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Internal Error for Deleted in Students Data",
+    });
+  }
+});
+
 // Start Server
 const startServer = async () => {
   try {
