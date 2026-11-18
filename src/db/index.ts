@@ -54,6 +54,19 @@ export const initDataBase = async () => {
       DROP CONSTRAINT IF EXISTS student_management_password_key;
     `);
 
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS profile(
+      id SERIAL PRIMARY KEY,
+      student_id INT UNIQUE REFERENCES student_management(id) ON DELETE CASCADE,
+      bio TEXT,
+      address TEXT,
+      gender VARCHAR(15),
+
+        created_at TIMESTAMP DEFAULT NOW(),
+        updated_at TIMESTAMP DEFAULT NOW()
+      )
+      `);
+
     console.log("Database Table Created Successfully!");
   } catch (error) {
     console.error("Database Error:", error);
