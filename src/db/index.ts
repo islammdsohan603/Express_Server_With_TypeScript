@@ -14,6 +14,9 @@ pool.on("error", (error) => {
 // Database Table Create
 export const initDataBase = async () => {
   try {
+    // 1. Student Table Create
+    console.log("Creating Student Table...");
+
     await pool.query(`
       CREATE TABLE IF NOT EXISTS student_management (
         id SERIAL PRIMARY KEY,
@@ -30,7 +33,9 @@ export const initDataBase = async () => {
       );
     `);
 
-    // Existing database-এর জন্য migration
+    // 2. Existing Database Migration
+    console.log("Running Student Table Migration...");
+
     await pool.query(`
       ALTER TABLE student_management
       ADD COLUMN IF NOT EXISTS email VARCHAR(255);
@@ -41,35 +46,59 @@ export const initDataBase = async () => {
       ADD COLUMN IF NOT EXISTS password VARCHAR(255);
     `);
 
-    // Email unique রাখবে
+    // 3. Remove Old Password Unique Constraint
+    await pool.query(`
+      ALTER TABLE student_management
+      DROP CONSTRAINT IF EXISTS student_management_password_key;
+    `);
+
+    // 4. Check Duplicate Emails
+    console.log("Checking Duplicate Emails...");
+
+    const duplicateEmails = await pool.query(`
+      SELECT email, COUNT(*) AS total
+      FROM student_management
+      WHERE email IS NOT NULL
+      GROUP BY email
+      HAVING COUNT(*) > 1;
+    `);
+
+    if (duplicateEmails.rows.length > 0) {
+      throw new Error(
+        "Duplicate emails found. Please fix duplicate email records first.",
+      );
+    }
+
+    // 5. Create Unique Email Index
     await pool.query(`
       CREATE UNIQUE INDEX IF NOT EXISTS
       student_management_email_unique_idx
       ON student_management(email);
     `);
 
-    // Password কখনো unique হওয়া প্রয়োজন নেই
-    await pool.query(`
-      ALTER TABLE student_management
-      DROP CONSTRAINT IF EXISTS student_management_password_key;
-    `);
+    // 6. Create Profile Table
+    console.log("Creating Profile Table...");
 
     await pool.query(`
-      CREATE TABLE IF NOT EXISTS profile(
-      id SERIAL PRIMARY KEY,
-      student_id INT UNIQUE REFERENCES student_management(id) ON DELETE CASCADE,
-      bio TEXT,
-      address TEXT,
-      gender VARCHAR(15),
+      CREATE TABLE IF NOT EXISTS profile (
+        id SERIAL PRIMARY KEY,
+
+        student_id INTEGER NOT NULL UNIQUE
+          REFERENCES student_management(id)
+          ON DELETE CASCADE,
+
+        bio TEXT,
+        address TEXT,
+        gender VARCHAR(15),
 
         created_at TIMESTAMP DEFAULT NOW(),
         updated_at TIMESTAMP DEFAULT NOW()
-      )
-      `);
+      );
+    `);
 
-    console.log("Database Table Created Successfully!");
+    console.log("Database Tables Created Successfully!");
   } catch (error) {
-    console.error("Database Error:", error);
+    console.error("Database Initialization Failed:", error);
     throw error;
   }
 };
