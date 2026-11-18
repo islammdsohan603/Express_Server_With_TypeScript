@@ -1,8 +1,7 @@
 import bcrypt from "bcryptjs";
+import { pool } from "../db/index.js";
 import AppError from "../errors/app-error.js";
 import type { IStudents, IUpdateStudent } from "./stuents.interface.js";
-import { pool } from "../db/index.js";
- 
 
 // Validate Student ID
 const validateStudentId = (id: string) => {
@@ -92,6 +91,7 @@ const createStudentsDB = async (payload: IStudents) => {
       [full_name, email, hashedPassword, phone, age, department, marks],
     );
 
+    delete studentsData.rows[0].hashedPassword;
     return studentsData.rows[0];
   } catch (error) {
     handleDatabaseError(error);
