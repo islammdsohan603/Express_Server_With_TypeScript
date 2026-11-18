@@ -15,7 +15,6 @@ pool.on("error", (error) => {
 export const initDataBase = async () => {
   try {
     // 1. Student Table Create
-    console.log("Creating Student Table...");
 
     await pool.query(`
       CREATE TABLE IF NOT EXISTS student_management (
@@ -34,7 +33,6 @@ export const initDataBase = async () => {
     `);
 
     // 2. Existing Database Migration
-    console.log("Running Student Table Migration...");
 
     await pool.query(`
       ALTER TABLE student_management
@@ -53,7 +51,6 @@ export const initDataBase = async () => {
     `);
 
     // 4. Check Duplicate Emails
-    console.log("Checking Duplicate Emails...");
 
     const duplicateEmails = await pool.query(`
       SELECT email, COUNT(*) AS total
@@ -77,7 +74,6 @@ export const initDataBase = async () => {
     `);
 
     // 6. Create Profile Table
-    console.log("Creating Profile Table...");
 
     await pool.query(`
       CREATE TABLE IF NOT EXISTS profile (
